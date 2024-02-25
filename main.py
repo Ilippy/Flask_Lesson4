@@ -1,7 +1,10 @@
+import concurrent
+
 import requests
 from pathlib import Path
 import time
 import threading
+import concurrent.futures
 import multiprocessing
 import asyncio
 import aiohttp
@@ -138,8 +141,34 @@ async def task6(path: Path):
 # Массив должен быть заполнен случайными целыми числами от 1 до 100.
 # При решении задачи нужно использовать многопоточность, многопроцессорность и асинхронность.
 # В каждом решении нужно вывести время выполнения вычислений.
+def get_sum_array(arr: list[int]):
+    return sum(arr)
+
+
 async def get_sum_array_async(arr: list[int]):
     return sum(arr)
+
+
+def task7_thread(arr: list[int]):
+    start_time = time.time()
+    arr_len_10 = len(arr) // 10
+    arrays = [arr[arr_len_10 * i:arr_len_10 * (i + 1)] for i in range(10)]
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        results = list(executor.map(get_sum_array, arrays))  # results is generator converted to list
+        # for result in results:
+        #     print(result)
+    print(f"Thread - sum arr = {sum(results)} - took {time.time() - start_time:.5f}")
+
+
+def task7_multiprocessing(arr: list[int]):
+    start_time = time.time()
+    arr_len_10 = len(arr) // 10
+    arrays = [arr[arr_len_10 * i:arr_len_10 * (i + 1)] for i in range(10)]
+    with concurrent.futures.ProcessPoolExecutor() as executor:
+        results = list(executor.map(get_sum_array, arrays))  # results is generator converted to list
+        # for result in results:
+        #     print(result)
+    print(f"Thread - sum arr = {sum(results)} - took {time.time() - start_time:.5f}")
 
 
 async def task7_async(arr: list[int]):
@@ -151,10 +180,9 @@ async def task7_async(arr: list[int]):
 
 def task7():
     arr = [randint(1, 100) for i in range(1_000_000)]
+    task7_thread(arr)
+    task7_multiprocessing(arr)
     asyncio.run(task7_async(arr))
-    start_time = time.time()
-    sum_arr = sum(arr)
-    print(f"Noraml - sum arr = {sum_arr} - took {time.time() - start_time:.5f}")  # 2 times faster than async
 
 
 def main():
